@@ -16,21 +16,27 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
  * Implements hook_boot().
  */
 function sf_dic_boot() {
 
-  // There is no way to allow this module to get the enabled module list
-  // before the DRUPAL_BOOTSTRAP_CONFIGURATION phase (if you are lucky and
-  // caches are set) or before the DRUPAL_BOOTSTRAP_DATABASE phase (because
-  // Drupal will need the database to get the module list). That's why the
-  // hook_boot() implementation will keep living in here. This means that
-  // there is absolutly no way to allow cache backends services to be in
-  // the service container, sad, but true story.
-  \Drupal::_getKernel()->handle(Request::createFromGlobals());
+  $kernel = \Drupal::_getKernel();
+
+  // If a request is there, this means that we actually are working within
+  // the Symfony fullstack framework or pending some CLI command line or
+  // unit testing context.
+  if (!$kernel->getContainer()->get('request_stack')->getCurrentRequest()) {
+    // There is no way to allow this module to get the enabled module list
+    // before the DRUPAL_BOOTSTRAP_CONFIGURATION phase (if you are lucky and
+    // caches are set) or before the DRUPAL_BOOTSTRAP_DATABASE phase (because
+    // Drupal will need the database to get the module list). That's why the
+    // hook_boot() implementation will keep living in here. This means that
+    // there is absolutly no way to allow cache backends services to be in
+    // the service container, sad, but true story.
+    \Drupal::_getKernel()->handle(Request::createFromGlobals());
+  }
 
   // Change path.inc to proxify toward Drupal 8 compatible API.
   // Do not alter it when the function already exists (mostly happend at site
@@ -257,7 +263,7 @@ function sf_dic_page_form($formClass) {
  * Implements hook_exit().
  */
 function sf_dic_exit() {
-  \Drupal::service('event_dispatcher')->dispatch(KernelEvents::TERMINATE);
+  //\Drupal::service('event_dispatcher')->dispatch(KernelEvents::TERMINATE);
 }
 
 /**

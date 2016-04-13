@@ -28,18 +28,6 @@ class Drupal
         self::$kernel = $kernel;
     }
 
-    static private function _buildKernel()
-    {
-        if (!self::$kernel) {
-            $env    = empty($GLOBALS['conf']['kernel.environment']) ? 'dev' : $GLOBALS['conf']['kernel.environment'];
-            $debug  = !isset($GLOBALS['conf']['kernel.debug']) ? true : $GLOBALS['conf']['kernel.debug'];
-
-            self::$kernel = new Kernel($env, $debug);
-        }
-
-        return self::$kernel;
-    }
-
     /**
      * Register bundles
      *
@@ -63,7 +51,15 @@ class Drupal
      */
     static public function _getKernel()
     {
-        return self::_buildKernel();
+        if (!self::$kernel) {
+            $env    = empty($GLOBALS['conf']['kernel.environment']) ? 'dev' : $GLOBALS['conf']['kernel.environment'];
+            $debug  = !isset($GLOBALS['conf']['kernel.debug']) ? true : $GLOBALS['conf']['kernel.debug'];
+
+            self::$kernel = new Kernel($env, $debug);
+            self::$kernel->boot();
+        }
+
+        return self::$kernel;
     }
 
     /**
@@ -185,29 +181,12 @@ class Drupal
         // Check hasContainer() first in order to always return a Boolean.
         return
             static::hasContainer() &&
-            static::getContainer()->has('request_stack') /* &&
-            static::getContainer()->get('request_stack')->getCurrentRequest() !== null */
+            static::getContainer()->has('request_stack')
         ;
     }
 
     /**
      * Retrieves the currently active request object.
-     *
-     * Note: The use of this wrapper in particular is especially discouraged. Most
-     * code should not need to access the request directly.  Doing so means it
-     * will only function when handling an HTTP request, and will require special
-     * modification or wrapping when run from a command line tool, from certain
-     * queue processors, or from automated tests.
-     *
-     * If code must access the request, it is considerably better to register
-     * an object with the Service Container and give it a setRequest() method
-     * that is configured to run when the service is created.  That way, the
-     * correct request object can always be provided by the container and the
-     * service can still be unit tested.
-     *
-     * If this method must be used, never save the request object that is
-     * returned.  Doing so may lead to inconsistencies as the request object is
-     * volatile and may change at various times, such as during a subrequest.
      *
      * @return \Symfony\Component\HttpFoundation\Request
      *   The currently active request object.
@@ -227,56 +206,4 @@ class Drupal
     {
         return static::getContainer()->get('request_stack');
     }
-
-    /**
-     * Returns the requested cache bin.
-     *
-     * @param string $bin
-     *   (optional) The cache bin for which the cache object should be returned,
-     *   defaults to 'default'.
-     *
-     * @return \Drupal\Core\Cache\CacheBackendInterface
-     *   The cache object associated with the specified bin.
-     *
-     * @ingroup cache
-     */
-  //   public static function cache($bin = 'default') {
-  //     return static::getContainer()->get('cache.' . $bin);
-  //   }
-
-    /**
-     * Returns a queue for the given queue name.
-     *
-     * The following values can be set in your settings.php file's $settings
-     * array to define which services are used for queues:
-     * - queue_reliable_service_$name: The container service to use for the
-     *   reliable queue $name.
-     * - queue_service_$name: The container service to use for the
-     *   queue $name.
-     * - queue_default: The container service to use by default for queues
-     *   without overrides. This defaults to 'queue.database'.
-     *
-     * @param string $name
-     *   The name of the queue to work with.
-     * @param bool $reliable
-     *   (optional) TRUE if the ordering of items and guaranteeing every item
-     *   executes at least once is important, FALSE if scalability is the main
-     *   concern. Defaults to FALSE.
-     *
-     * @return \Drupal\Core\Queue\QueueInterface
-     *   The queue object for a given name.
-     */
-  //   public static function queue($name, $reliable = FALSE) {
-  //     return static::getContainer()->get('queue')->get($name, $reliable);
-  //   }
-  
-    /**
-     * Returns the default http client.
-     *
-     * @return \GuzzleHttp\Client
-     *   A guzzle http client instance.
-     */
-  //   public static function httpClient() {
-  //     return static::getContainer()->get('http_client');
-  //   }
 }

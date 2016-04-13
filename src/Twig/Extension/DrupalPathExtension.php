@@ -22,12 +22,15 @@ class DrupalPathExtension extends \Twig_Extension
         if ($parameters) {
             $tokens = [];
             foreach ($parameters as $key => $value) {
-                $tokens['%' . $key] = $value;
+                if (false !== strpos($route, '%key')) {
+                    $tokens['%' . $key] = $value;
+                    unset($parameters[$key]);
+                }
             }
             $route = strtr($route, $tokens);
         }
 
-        return url($route);
+        return url(trim($route . '/' . implode('/', $parameters), '/'));
     }
 
     /**

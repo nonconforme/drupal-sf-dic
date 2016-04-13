@@ -10,9 +10,10 @@ services:
     class: Symfony\Component\HttpKernel\KernelInterface
     factory: [Drupal, _getKernel]
 
-  http_kernel:
-    class: Symfony\Component\HttpKernel\HttpKernelInterface
-    factory: ["@kernel", getHttpKernel]
+# FIXME when using fullstack, this is already registered and this will bug
+#  http_kernel:
+#    class: Symfony\Component\HttpKernel\HttpKernelInterface
+#    factory: ["@kernel", getHttpKernel]
 
   # For symfony compatibility
   file_locator:
@@ -146,18 +147,15 @@ services:
     parent: logger.channel_base
     arguments: ['form']
 
-  session:
-    class: MakinaCorpus\Drupal\Sf\Session\DrupalSession
-
   sf_dic.console.command.dropkernel:
     class: MakinaCorpus\Drupal\Sf\Command\DropKernelCacheCommand
     tags: [{name: console.command}]
 
   # Empty testing service, it will contain all services this module provides
   # in order to be able to unit test it
-  test_empty_service:
-    class: MakinaCorpus\Drupal\Sf\Tests\Mockup\EmptyService
-    arguments: ["%some_variable%"]
-    calls:
-      - [setContainer, ["@service_container"]]
-      - [setDatabaseConnection, ["@database"]]
+#  test_empty_service:
+#    class: MakinaCorpus\Drupal\Sf\Tests\Mockup\EmptyService
+#    arguments: ["%some_variable%"]
+#    calls:
+#      - [setContainer, ["@service_container"]]
+#      - [setDatabaseConnection, ["@database"]]
