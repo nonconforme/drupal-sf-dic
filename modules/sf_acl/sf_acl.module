@@ -50,15 +50,14 @@ function _sf_acl_manager() {
  * Implements hook_node_access().
  */
 function sf_acl_node_access($node, $op, $account) {
-  $manager = _sf_acl_manager();
-  if ($manager->supportsResource($node)) {
-    if ($manager->isGranted($node, $account, $op)) {
+  switch (_sf_acl_manager()->vote($node, $account, $op)) {
+    case Manager::ALLOW:
       return NODE_ACCESS_ALLOW;
-    } else {
+    case Manager::DENY:
       return NODE_ACCESS_DENY;
-    }
+    default:
+      return NODE_ACCESS_IGNORE;
   }
-  return NODE_ACCESS_IGNORE;
 }
 
 /**
