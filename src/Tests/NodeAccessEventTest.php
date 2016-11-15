@@ -8,9 +8,6 @@ use Drupal\user\User;
 use MakinaCorpus\Drupal\Sf\EventDispatcher\NodeAccessEvent;
 
 use Symfony\Component\EventDispatcher\EventDispatcher;
-use MakinaCorpus\Drupal\Sf\EventDispatcher\NodeAccessGrantEvent;
-use MakinaCorpus\Drupal\Sf\EventDispatcher\NodeAccessRecordEvent;
-use MakinaCorpus\Drupal\Sf\EventDispatcher\NodeAccessSubscriber;
 
 class NodeAccessEventTest extends \PHPUnit_Framework_TestCase
 {
@@ -75,35 +72,5 @@ class NodeAccessEventTest extends \PHPUnit_Framework_TestCase
         $this->dispatcher->dispatch(NodeAccessEvent::EVENT_NODE_ACCESS, new NodeAccessEvent($node, $account, 'view'));
 
         $this->assertSame(3, $count);
-    }
-
-    public function testNodeAccessCreateDoNoRunGrant()
-    {
-        $this->dispatcher->addSubscriber(new NodeAccessSubscriber($this->dispatcher));
-
-        $this->dispatcher->addListener(NodeAccessGrantEvent::EVENT_NODE_ACCESS_GRANT, function (NodeAccessGrantEvent $e) {
-            throw new \Exception("You shall not pass");
-        });
-
-        $this->dispatcher->addListener(NodeAccessRecordEvent::EVENT_NODE_ACCESS_RECORD, function (NodeAccessRecordEvent $e) {
-            throw new \Exception("You shall not pass");
-        });
-
-        $account = new User();
-        $node = new Node();
-        $this->dispatcher->dispatch(NodeAccessEvent::EVENT_NODE_ACCESS, new NodeAccessEvent($node, $account, 'create'));
-
-        try {
-            $this->dispatcher->dispatch(NodeAccessEvent::EVENT_NODE_ACCESS, new NodeAccessEvent($node, $account, 'view'));
-
-            // It should have thrown exceptions here
-            $this->fail();
-
-        } catch (\Exception $e) {}
-    }
-
-    public function testNodeAccessMatrix()
-    {
-        // @todo
     }
 }
